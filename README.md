@@ -4,8 +4,11 @@ This scraper app uses Selenium to scrape the information from the Yahoo Finance 
 
 The prerequisites for this script to run are:
 * Ruby 3 installed, 
+* Google chrome drive,
 * Selenium webdriver,  
 * Sqlite3
+
+After all the prerequisites have been installed, please run `bundle install`
 
 Run the script with this command:
 
@@ -22,3 +25,5 @@ The script will scrape the following information, as requested:
 * date and time, 
 * previous close price and 
 * open price 
+
+The information is stored in a json file and sqlite3 db file. 
