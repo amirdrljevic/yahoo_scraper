@@ -4,7 +4,10 @@ require 'json'
 require "sqlite3"
 
 # Check if more than 1 arguments were provided
-if ARGV.length > 1 
+if ARGV.length < 1 
+  puts "You must provide a stock symbol as an argument."
+  exit
+elsif ARGV.length > 1
   puts "Too many arguments"
   exit
 end
