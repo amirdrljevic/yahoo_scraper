@@ -13,22 +13,32 @@ After all the prerequisites have been installed, please run `bundle install`
 ## Running the script
 The script is located in the _app_ folder. Navigate to this folder and run the script with this command:
 
-`ruby yahoo_scraper.rb AMZN` 
+`ruby yahoo_scraper.rb` 
 
-_Instead of AMZN you can pass any other stock symbol like TWTR, FB, TSLA, ETSY, etc…_
+You will be asked to provide additional information: 
+* start date
+* end date
+* one or more stock symbols...
 
-Please, bear in mind that sometimes, due to slow network connection, script fails. Just rerun the script again in that case. 
+_symbols like AMZN, JNJ, PG, PFE, TWTR, FB, TSLA, ETSY, etc…_
+
+> Please, bear in mind that sometimes, due to slow network connection, script fails. Just rerun the script again in that case.
+> For that reason I have increased the sleep time to wait for the elements to load.  
 
 The script will scrape the following information, as requested:
+into table companies:
 * full company name, 
 * market cap, 
 * year founded, 
 * number of employees,
 * headquarters city and state. 
-* date and time, 
-* previous close price and 
-* open price 
+* previous close price 
 
-The information will be stored in a json file and sqlite3 db file. 
+into table historical_data:
+* date, 
+* open price,
+* close price
 
-> This scraper is maintained on April 18, 2022. any change from Yahoo Finance team to update their website might render this scraper broken.
+The information will be stored in sqlite3 db file. 
+
+> This scraper is maintained on April 20, 2022. any change from Yahoo Finance team to update their website might render this scraper broken.
