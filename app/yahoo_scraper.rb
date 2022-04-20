@@ -2,11 +2,14 @@ require 'selenium-webdriver'
 require 'byebug'
 require 'sqlite3'
 
+###################################################################
+# Step 1: 
 # Take user input:
 start_date = ''
 end_date = ''
 tickers = ''
 
+# Wait for the user to input the dates and tickers
 while(start_date.empty?)
   puts "Please type start date (ex. MM/DD/YYYY)"
   start_date = gets.chomp
@@ -22,6 +25,8 @@ while(tickers.empty?)
   tickers = gets.chomp
 end
 
+###################################################################
+# Step 2:
 # Create the DB
 # First, check if the output db file exists, delete it
 File.delete("YahooFinance.db") if File.exist?("YahooFinance.db")
@@ -29,7 +34,7 @@ File.delete("YahooFinance.db") if File.exist?("YahooFinance.db")
 # Create a database file
 db = SQLite3::Database.new "YahooFinance.db"
 
-# Create tables
+# Create 2 tables
 rows = db.execute <<-SQL
   create table companies (
     company_id varchar(30) PRIMARY KEY,
@@ -52,14 +57,14 @@ rows = db.execute <<-SQL
   );
 SQL
 
-#####################################################################################
+###################################################################
+# Step 3:
+# Make an array of tickers in uppercase
 tickers_array = tickers.upcase.split(" ")
 
+# Go through every ticker
 tickers_array.each do |ticker| 
-
-  target_asset = ticker
-
-  puts "Working on #{target_asset} ..."
+  puts "Working on #{ticker} ..."
 
   url = "https://finance.yahoo.com/"
 
@@ -70,7 +75,7 @@ tickers_array.each do |ticker|
 
     # Find the quote first
     search_input = driver.find_element(css: "input[placeholder='Quote Lookup']")
-    search_input.send_keys target_asset, :return
+    search_input.send_keys ticker, :return
     sleep 15
 
     # Create an empty hash, to be populated later
@@ -122,11 +127,7 @@ tickers_array.each do |ticker|
   # Insert into table
   db.execute("INSERT INTO companies 
               (company_id, full_name, market_cap, previous_close, year_founded, employee_number, headquarters) 
-              VALUES (?, ?, ?, ?, ?, ?, ?)", [target_asset, company_name, market_cap, prev_close_price, description, employee_number, headquarters])
-
-
-  #byebug
-  #x = "amir"
+              VALUES (?, ?, ?, ?, ?, ?, ?)", [ticker, company_name, market_cap, prev_close_price, description, employee_number, headquarters])
 
   # Go to Profile tab
   hist_data_tab = driver.find_element(:xpath, '//li[@data-test="HISTORICAL_DATA"]').click
@@ -150,6 +151,8 @@ tickers_array.each do |ticker|
   
   sleep 7
 
+  ###################################################################
+  # Step 4:
   # Locate the table on Historical Data tab and get the data
   the_table = driver.find_element(:xpath, '//table[@data-test="historical-prices"]/tbody')
   trs = the_table.find_elements(:tag_name, "tr")
@@ -168,13 +171,10 @@ tickers_array.each do |ticker|
     # Insert into table
     db.execute("INSERT INTO historical_data
       (company_id, date_hd, open_price, close_price)
-      VALUES (?, ?, ?, ?)", [target_asset, cell_date, cell_open, cell_close])
+      VALUES (?, ?, ?, ?)", [ticker, cell_date, cell_open, cell_close])
   end
 
-  #byebug
-  #c = "amir"
-
-  puts "The script for #{target_asset} was executed successfully."
+  puts "The script for #{ticker} was executed successfully."
 
   ensure
     driver.quit
