@@ -8,12 +8,12 @@ end_date = ''
 tickers = ''
 
 while(start_date.empty?)
-  puts "Please type start date (ex. YYYY/MM/DD)"
+  puts "Please type start date (ex. MM/DD/YYYY)"
   start_date = gets.chomp
 end
 
 while(end_date.empty?)
-  puts "Please type end date (ex. YYYY/MM/DD)"
+  puts "Please type end date (ex. MM/DD/YYYY)"
   end_date = gets.chomp 
 end
 
@@ -125,8 +125,55 @@ tickers_array.each do |ticker|
               VALUES (?, ?, ?, ?, ?, ?, ?)", [target_asset, company_name, market_cap, prev_close_price, description, employee_number, headquarters])
 
 
-   #byebug
-   #x = "amir"
+  #byebug
+  #x = "amir"
+
+  # Go to Profile tab
+  hist_data_tab = driver.find_element(:xpath, '//li[@data-test="HISTORICAL_DATA"]').click
+  sleep 15
+  
+  # Click on the time period Date range button
+  driver.find_element(:xpath, '//div[@class="M(0) O(n):f D(ib) Bd(0) dateRangeBtn O(n):f Pos(r)"]').click
+  sleep 5
+
+  # Input start date
+  driver.find_element(:name, 'startDate').send_keys start_date
+
+  # Input end date
+  driver.find_element(:name, 'endDate').send_keys end_date
+
+  # Click on button Done
+  driver.find_element(:xpath, '//button[@class=" Bgc($linkColor) Bdrs(3px) Px(20px) Miw(100px) Whs(nw) Fz(s) Fw(500) C(white) Bgc($linkActiveColor):h Bd(0) D(ib) Cur(p) Td(n)  Py(9px) Miw(80px)! Fl(start)"]').click  
+
+  # Click on the Apply button
+  driver.find_element(:xpath, '//button[@class=" Bgc($linkColor) Bdrs(3px) Px(20px) Miw(100px) Whs(nw) Fz(s) Fw(500) C(white) Bgc($linkActiveColor):h Bd(0) D(ib) Cur(p) Td(n)  Py(9px) Fl(end)"]').click  
+  
+  sleep 7
+
+  # Locate the table on Historical Data tab and get the data
+  the_table = driver.find_element(:xpath, '//table[@data-test="historical-prices"]/tbody')
+  trs = the_table.find_elements(:tag_name, "tr")
+
+  trs.each do |row|
+    tds = row.find_elements(:tag_name, "td")
+    # locate Date column cell data
+    cell_date = row.find_element(:css, 'td:nth-child(1)').text
+
+    # locate Open column cell data
+    cell_open = row.find_element(:css, 'td:nth-child(2)').text
+
+    # locate Close column cell data
+    cell_close = row.find_element(:css, 'td:nth-child(5)').text    
+
+    # Insert into table
+    db.execute("INSERT INTO historical_data
+      (company_id, date_hd, open_price, close_price)
+      VALUES (?, ?, ?, ?)", [target_asset, cell_date, cell_open, cell_close])
+  end
+
+  #byebug
+  #c = "amir"
+
   puts "The script for #{target_asset} was executed successfully."
 
   ensure
@@ -134,4 +181,4 @@ tickers_array.each do |ticker|
   end
 end
 
-puts "The script has successfully scraped info for #{tickers}"
+puts "The script has successfully scraped info for #{tickers.upcase}"
